@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <title>Masum Mahmud Bank Limited</title>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      background: #ecf0f1;
+      padding: 20px;
+    }
+    header {
+      background: #34495e;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    nav {
+      margin-top: 10px;
+    }
+    nav button {
+      margin-right: 10px;
+      padding: 10px 15px;
+      background: #2ecc71;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    nav button:hover {
+      background: #27ae60;
+    }
+
+    #main-balance {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #total-profit {
+      background: tomato;
+      color: white;
+      padding: 12px 15px;
+      margin-top: 8px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    #totals-line, #charges-line {
+      background: #000000;
+      color: white;
+      margin-top: 8px;
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      white-space: nowrap;
+    }
+
+    #totals-line div:nth-child(1) { color: #27ae60; }
+    #totals-line div:nth-child(2) { color: #e74c3c; }
+    #totals-line div:nth-child(3) { color: #2980b9; }
+
+    #charges-line div:nth-child(1) { color: #e74c3c; }
+    #charges-line div:nth-child(2) { color: #2980b9; }
+
+    #input-area input {
+      padding: 10px;
+      width: 200px;
+      margin-right: 10px;
+    }
+    #input-area button {
+      padding: 10px 15px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .transactions {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 15px;
+    }
+    .trx-card {
+      background: white;
+      padding: 15px;
+      border-left: 6px solid #bdc3c7;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .trx-card.deposit { border-color: #27ae60; }
+    .trx-card.withdraw { border-color: #e74c3c; }
+    .trx-card.transfer { border-color: #2980b9; }
+
+    .trx-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    .trx-details {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>👋 Welcome Masum Sir</h2>
+  <div id="time">⏰ Loading...</div>
+  <nav>
+    <button onclick="showForm('deposit')">Balance (+)</button>
+    <button onclick="showForm('withdraw')">Balance (-)</button>
+    <button onclick="showForm('transfer')">Transfer</button>
+  </nav>
+</header>
+
+<div id="main-balance">Current Balance: ৳0.00</div>
+<div id="total-profit">Total Profit: ৳0.00</div>
+
+<div id="totals-line">
+  <div>Deposite : ৳<span id="cashInTotal">0</span></div>
+  <div>Withdraw : ৳<span id="cashOutTotal">0</span></div>
+  <div>Transfer : ৳<span id="sendMoneyTotal">0</span></div>
+</div>
+
+<div id="charges-line">
+  <div>Withdraw Charges : ৳<span id="cashOutChargesTotal">0.00</span></div>
+  <div>Transfer Charges : ৳<span id="sendMoneyChargesTotal">0.00</span></div>
+</div>
+
+<div id="input-area"></div>
+<div class="transactions" id="transactions"></div>
+
+<footer>© 2025 Masum Bank. All rights reserved.</footer>
+
+<script>
+  let balance = 0;
+  let totalCashIn = 0, totalCashOut = 0, totalSendMoney = 0;
+  let totalCashOutCharges = 0, totalSendMoneyCharges = 0;
+  let totalProfit = 0;
+
+  const cashInList = [1020,2040,1530,3060,4080,5100,6120,7140,8160,10200,15300,20400,25500,30600];
+  const cashOutList = [1000,2000,1500,3000,4000,5000,6000,7000,8000,10000,15000,20000,25000,30000];
+  const sendMoneyList = [500,1000,1200,1500,1700,1800,2000,2500,2700,3000,3500,3700,4000,4500,4800,5000,5200,5500,6000,6500,6800,7000,7500,8000,8500,9000,9500,10000,10200,15300,15000,20000,20400,25000,25500,28000,28880,30000,31000];
+  const phonePrefixes = ['019', '018', '017', '016'];
+
+  function updateTime() {
+    const now = new Date();
+    document.getElementById("time").innerText = "⏰ " + now.toLocaleString();
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  function showForm(type) {
+    document.getElementById("input-area").innerHTML = `
+      <input id="amount" type="number" placeholder="Enter amount" />
+      <button onclick="submit('${type}')">${type === 'deposit' ? 'Cash In' : type === 'withdraw' ? 'Cash Out' : 'Send Money'}</button>
+    `;
+  }
+
+  function updateDisplay() {
+    document.getElementById("main-balance").innerText = `Current Balance: ৳${balance.toFixed(2)}`;
+    document.getElementById("total-profit").innerText = `Total Profit: ৳${totalProfit.toFixed(2)}`;
+    document.getElementById("cashInTotal").innerText = totalCashIn;
+    document.getElementById("cashOutTotal").innerText = totalCashOut;
+    document.getElementById("sendMoneyTotal").innerText = totalSendMoney;
+    document.getElementById("cashOutChargesTotal").innerText = totalCashOutCharges.toFixed(2);
+    document.getElementById("sendMoneyChargesTotal").innerText = totalSendMoneyCharges.toFixed(2);
+  }
+
+  function randomPhone() {
+    const prefix = phonePrefixes[Math.floor(Math.random() * phonePrefixes.length)];
+    const rest = Math.floor(10000000 + Math.random() * 89999999);
+    return prefix + rest;
+  }
+
+  function submit(type, autoAmount = null) {
+    const amount = autoAmount ?? parseFloat(document.getElementById("amount").value);
+    if (!amount || amount <= 0) return;
+
+    const now = new Date();
+    const trxId = "MM" + Math.random().toString(36).slice(2, 10).toUpperCase();
+    const phone = randomPhone();
+
+    let charge = 0;
+    let note = '';
+
+    if (type === 'deposit') {
+      balance += amount;
+      totalCashIn += amount;
+      note = `Deposite ৳${amount}`;
+    } else if (type === 'withdraw') {
+      charge = (amount * 18.50) / 1000;  // 0.185% charge
+      if (amount + charge > balance) return;
+      balance -= (amount + charge);
+      totalCashOut += amount;
+      totalCashOutCharges += charge;
+      totalProfit += charge;
+      note = `Withdraw ৳${amount} (Charge ৳${charge.toFixed(2)})`;
+    } else if (type === 'transfer') {
+      charge = 5; // fixed ৫ টাকা
+      if (amount + charge > balance) return;
+      balance -= (amount + charge);
+      totalSendMoney += amount;
+      totalSendMoneyCharges += charge;
+      totalProfit += charge;
+      note = `Transfer ৳${amount} (Charge ৳${charge.toFixed(2)})`;
+    }
+
+    updateDisplay();
+    addTransactionCard(type, now, amount, charge, trxId, phone, note);
+    if (!autoAmount) document.getElementById("input-area").innerHTML = '';
+  }
+
+  function addTransactionCard(type, time, amount, charge, trxId, phone, note) {
+    const trxBox = document.createElement('div');
+    let displayType = type === 'deposit' ? 'Deposite' : type === 'withdraw' ? 'Withdraw' : 'Transfer';
+    trxBox.className = `trx-card ${type}`;
+    trxBox.innerHTML = `
+      <div class="trx-header">${displayType.toUpperCase()} ✅</div>
+      <div class="trx-details">
+        📝 ${note}<br>
+        📞 Phone: ${phone}<br>
+        🔐 TRX ID: ${trxId}<br>
+        🕒 Time: ${time.toLocaleString()}
+      </div>
+    `;
+    document.getElementById("transactions").appendChild(trxBox);
+  }
+
+  function autoBanking() {
+    const types = ['deposit', 'withdraw', 'transfer'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    let amount = 0;
+
+    if (type === 'deposit') {
+      amount = cashInList[Math.floor(Math.random() * cashInList.length)];
+    } else if (type === 'withdraw') {
+      amount = cashOutList[Math.floor(Math.random() * cashOutList.length)];
+    } else if (type === 'transfer') {
+      amount = sendMoneyList[Math.floor(Math.random() * sendMoneyList.length)];
+    }
+
+    submit(type, amount);
+    const next = Math.floor(Math.random() * 4000) + 1000;
+    setTimeout(autoBanking, next);
+  }
+
+  autoBanking();
+</script>
+
+</body>
+</html>
