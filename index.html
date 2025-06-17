@@ -69,24 +69,20 @@
       position: relative;
       overflow: hidden;
     }
-    /* কার্ড স্পিন ডিজাইন */
     .wheel .items {
       position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 0;
+      left: 0;
       width: 100%;
       text-align: center;
-      transition: top 5s ease-out;
-      font-size: 50px;
-      user-select: none;
+      transition: transform 5s ease-out;
     }
     .wheel .item {
       height: 130px;
       line-height: 130px;
       color: #fff;
+      font-size: 50px;
     }
-    /* হাইলাইটিং */
     .wheel.win {
       box-shadow: 0 0 25px 6px #76ff03;
       border-color: #76ff03;
@@ -110,19 +106,27 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.4);
       width: 80px;
       cursor: pointer;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
-      user-select: none;
       color: #fff;
-      position: relative;
+      user-select: none;
+      transition: 0.3s;
     }
     .bet-box.active {
       border: 2px solid #76ff03;
       background-color: #334e3c;
     }
+    .bet-box.win {
+      border: 2px solid #76ff03;
+      background-color: #1b5e20;
+      box-shadow: 0 0 15px #76ff03;
+    }
+    .bet-box.loss {
+      border: 2px solid #e53935;
+      background-color: #4e2626;
+      box-shadow: 0 0 15px #e53935;
+    }
     .bet-box h3 {
       margin-bottom: 6px;
       font-size: 20px;
-      user-select: none;
     }
     .bet-box small {
       display: block;
@@ -138,10 +142,6 @@
       color: white;
       cursor: pointer;
       width: 100%;
-      user-select: none;
-    }
-    .bet-box button:hover:not(:disabled) {
-      background: #ef6c00;
     }
     .bet-box button:disabled {
       background: #888;
@@ -163,93 +163,25 @@
     #history h2 {
       margin-bottom: 10px;
       color: #4dd0e1;
-      user-select: none;
     }
     .round-entry {
       margin-bottom: 8px;
       border-bottom: 1px solid #004d40;
       padding-bottom: 4px;
-      word-wrap: break-word;
     }
     .win-round { color: #76ff03; }
     .loss-round { color: #ff5252; }
-
-    /* Responsive Design for Mobile */
-    @media (max-width: 480px) {
-      body {
-        padding: 15px 8px;
-      }
-      h1 {
-        font-size: 24px;
-      }
-      #balance {
-        font-size: 18px;
-        padding: 8px 16px;
-        min-width: 120px;
-      }
-      #stats {
-        min-width: auto;
-        font-size: 14px;
-      }
-      #timer {
-        font-size: 16px;
-        margin-bottom: 12px;
-      }
-      .wheel-row {
-        gap: 20px;
-      }
-      .wheel {
-        width: 90px;
-        height: 90px;
-        font-size: 32px;
-        border-width: 3px;
-      }
-      .wheel .items {
-        font-size: 32px;
-      }
-      .wheel .item {
-        height: 90px;
-        line-height: 90px;
-      }
-      .bet-container {
-        max-width: 100%;
-        gap: 8px;
-      }
-      .bet-box {
-        width: 60px;
-        padding: 8px 5px;
-      }
-      .bet-box h3 {
-        font-size: 16px;
-      }
-      .bet-box small {
-        font-size: 12px;
-        margin-bottom: 4px;
-      }
-      .bet-box button {
-        font-size: 12px;
-        padding: 4px 6px;
-      }
-      #history {
-        max-height: 200px;
-        font-size: 12px;
-      }
-    }
   </style>
 </head>
 <body>
   <h1>🃏 Masum Casino - Card Matka</h1>
-  <div id="balance">Balance: ৳1000</div>
+  <div id="balance">Balance: ৳5000</div>
   <div id="stats">Total Stake: ৳0</div>
   <div id="timer">⏳ Place your bet... (15s)</div>
 
   <div class="wheel-row">
-    <div class="wheel" id="wheel1">
-      <div class="items" id="wheel1Items"></div>
-    </div>
-    <div class="wheel" id="wheel2">
-      <div class="items" id="wheel2Items"></div>
-    </div>
+    <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
+    <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
   </div>
 
   <div class="bet-container" id="betArea"></div>
@@ -274,33 +206,26 @@
   let selectedBets = {};
   const betAmount = 100;
   const maxBetPerItem = 5;
-
-  // cards এর মধ্যে Z যুক্ত করলাম
   const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J'];
   const suits = ['♠', '♥', '♦', '♣'];
 
-  let time = 20;
+  let time = 15;
   let isLocked = false;
 
-  // wheel1 এর জন্য কার্ড তালিকা (উল্টো করে যোগ করা যাতে উপরে থেকে নিচে আসার মতো হয়)
   function createWheelItems(items) {
     const list = [];
-    for(let i=0; i<10; i++) {
-      list.push(...items);
-    }
+    for (let i = 0; i < 10; i++) list.push(...items);
     return list;
   }
 
   let wheel1List = createWheelItems(cards);
   let wheel2List = createWheelItems(suits);
 
-  // items html এ সেট করা
   function renderWheelItems() {
     wheel1Items.innerHTML = wheel1List.map(i => `<div class="item">${i}</div>`).join('');
     wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
   }
 
-  // বেটিং এর জন্য বক্স, cards এবং suits একসাথে রেখে Z অটোমেটিক থাকবে
   const allItems = [...new Set(cards), ...suits];
 
   function renderBets(winItems = [], lostItems = []) {
@@ -309,21 +234,15 @@
       const box = document.createElement('div');
       box.classList.add('bet-box');
       if (selectedBets[item]) box.classList.add('active');
-
-      if (winItems.includes(item)) {
-        box.classList.add('win');
-      } else if (lostItems.includes(item)) {
-        box.classList.add('loss');
-      }
+      if (winItems.includes(item)) box.classList.add('win');
+      else if (lostItems.includes(item)) box.classList.add('loss');
 
       const betValue = (selectedBets[item] || 0);
       box.innerHTML = `
         <h3>${item}</h3>
         <small>৳${betValue * betAmount}</small>
-        <button 
-          onclick="placeBet('${item}')" 
-          ${isLocked || betValue >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}
-        >BET</button>
+        <button onclick="placeBet('${item}')" 
+          ${isLocked || betValue >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}>BET</button>
       `;
       betArea.appendChild(box);
     });
@@ -332,7 +251,7 @@
   function placeBet(item) {
     if (isLocked) return;
     if (!selectedBets[item]) selectedBets[item] = 0;
-    if (selectedBets[item] >= maxBetPerItem) return alert('Max bet placed on this!');
+    if (selectedBets[item] >= maxBetPerItem) return alert('Max bet!');
     if (balance < betAmount) return alert('Not enough balance!');
     selectedBets[item]++;
     balance -= betAmount;
@@ -350,9 +269,7 @@
     const entry = document.createElement('div');
     entry.className = 'round-entry';
     entry.classList.add(reward > stake ? 'win-round' : 'loss-round');
-
-    let text = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward}`;
-    entry.textContent = text;
+    entry.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward}`;
     roundLog.prepend(entry);
   }
 
@@ -364,29 +281,19 @@
     });
   }
 
-  // স্পিন করার ফাংশন - উপরে থেকে নিচে ঘুরানোর animation
   function spinWheel(wheelElement, itemsList, finalItem) {
     return new Promise(resolve => {
-      const itemHeight = 130;
-      let positions = [];
-      itemsList.forEach((it, idx) => {
-        if (it === finalItem) positions.push(idx);
-      });
-      let finalPos = positions[positions.length - 1];
-
+      const itemHeight = wheelElement.offsetHeight;
       const itemsDiv = wheelElement.querySelector('.items');
-      itemsDiv.style.top = '100%';
+      let indexes = itemsList.map((v, i) => v === finalItem ? i : -1).filter(i => i !== -1);
+      let finalIndex = indexes[indexes.length - 1];
       itemsDiv.style.transition = 'none';
-
+      itemsDiv.style.transform = 'translateY(0)';
       setTimeout(() => {
-        itemsDiv.style.transition = 'top 5s ease-out';
-        let finalTop = -finalPos * itemHeight + (130 / 2 - itemHeight / 2);
-        itemsDiv.style.top = finalTop + 'px';
+        itemsDiv.style.transition = 'transform 5s ease-out';
+        itemsDiv.style.transform = `translateY(-${finalIndex * itemHeight}px)`;
       }, 50);
-
-      setTimeout(() => {
-        resolve();
-      }, 5000);
+      setTimeout(resolve, 5000);
     });
   }
 
@@ -394,7 +301,6 @@
     if (isLocked) return;
     isLocked = true;
     timerDiv.innerText = '🎯 Spinning...';
-
     clearHighlights();
 
     const finalCard = cards[Math.floor(Math.random() * cards.length)];
@@ -405,40 +311,25 @@
       spinWheel(wheel2, wheel2List, finalSuit)
     ]);
 
-    wheel1.classList.remove('loss', 'win');
-    wheel2.classList.remove('loss', 'win');
-
-    let totalWin = 0;
-    let stake = 0;
-    let winItems = [];
-    let lostItems = [];
+    let totalWin = 0, stake = 0, winItems = [], lostItems = [];
 
     Object.entries(selectedBets).forEach(([bet, count]) => {
       stake += count * betAmount;
       if (bet === finalCard || bet === finalSuit) {
-        const won = count * betAmount * 2.5;
-        totalWin += won;
+        totalWin += count * betAmount * 2.5;
         winItems.push(bet);
       } else {
-        if(count > 0) lostItems.push(bet);
+        if (count > 0) lostItems.push(bet);
       }
     });
 
     balance += totalWin;
     updateDisplay();
-
     renderBets(winItems, lostItems);
-
-    if (winItems.includes(finalCard)) {
-      wheel1.classList.add('win');
-    } else {
-      wheel1.classList.add('loss');
-    }
-    if (winItems.includes(finalSuit)) {
-      wheel2.classList.add('win');
-    } else {
-      wheel2.classList.add('loss');
-    }
+    if (winItems.includes(finalCard)) wheel1.classList.add('win');
+    else wheel1.classList.add('loss');
+    if (winItems.includes(finalSuit)) wheel2.classList.add('win');
+    else wheel2.classList.add('loss');
 
     logRound(finalCard, finalSuit, stake, totalWin);
 
