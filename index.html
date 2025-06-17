@@ -376,7 +376,7 @@
     Object.entries(selectedBets).forEach(([bet, count]) => {
       stake += count * betAmount;
       if (bet === finalCard || bet === finalSuit) {
-        const won = count * betAmount * 3;
+        const won = count * betAmount * 2.5;
         totalWin += won;
         winItems.push(bet);
       } else {
