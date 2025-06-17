@@ -212,7 +212,8 @@
   const betAmount = 100;
   const maxBetPerItem = 5;
 
-  const cards = ['K', 'Q', 'J', 'K', 'Q', 'J'];
+  // cards এর মধ্যে Z যুক্ত করলাম
+  const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J'];
   const suits = ['♠', '♥', '♦', '♣'];
 
   let time = 20;
@@ -220,7 +221,6 @@
 
   // wheel1 এর জন্য কার্ড তালিকা (উল্টো করে যোগ করা যাতে উপরে থেকে নিচে আসার মতো হয়)
   function createWheelItems(items) {
-    // 10+ আইটেম বানাবে (যাতে animation মসৃণ হয়)
     const list = [];
     for(let i=0; i<10; i++) {
       list.push(...items);
@@ -237,8 +237,8 @@
     wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
   }
 
-  // বেটিং এর জন্য বক্স
-  const allItems = [...new Set(cards), ...suits]; // cards unique করে এবং suits যোগ
+  // বেটিং এর জন্য বক্স, cards এবং suits একসাথে রেখে Z অটোমেটিক থাকবে
+  const allItems = [...new Set(cards), ...suits];
 
   function renderBets(winItems = [], lostItems = []) {
     betArea.innerHTML = '';
@@ -304,40 +304,23 @@
   // স্পিন করার ফাংশন - উপরে থেকে নিচে ঘুরানোর animation
   function spinWheel(wheelElement, itemsList, finalItem) {
     return new Promise(resolve => {
-      const itemHeight = 130; // প্রতিটি আইটেমের উচ্চতা
-      // finalItem-র পজিশন খুজে বের করো itemsList থেকে
-      // last 3 গুণ itemsList এর মধ্যে finalItem যতবার আছে তার সব শেষে যেটা হবে সেটার পজিশন নিবো
-      // যাতে ঘোরার পর finalItem ঠিক মাঝখানে থামে
-
+      const itemHeight = 130;
       let positions = [];
       itemsList.forEach((it, idx) => {
         if (it === finalItem) positions.push(idx);
       });
-      // শেষ পজিশন নিবো যাতে animation smooth হয়
       let finalPos = positions[positions.length - 1];
 
-      // top কে move করবো - উপরে থেকে নিচে নেবে
-      // প্রথমে top: 100%, মানে পুরো তালিকা নিচে থাকবে
-      // তারপর top: calculated position পজিশন দিবো যাতে finalItem মাঝখানে আসবে
-      // wheelElement এর .items কে animate করবো
-
       const itemsDiv = wheelElement.querySelector('.items');
-      // start top: 100%
       itemsDiv.style.top = '100%';
-
-      // ফাঁকা করে transition এবং পরে সেট করবো যাতে animation হয়
       itemsDiv.style.transition = 'none';
 
-      // small delay দিয়ে animation শুরু
       setTimeout(() => {
         itemsDiv.style.transition = 'top 5s ease-out';
-        // final top পজিশন হিসেব: - (finalPos * itemHeight) + (wheel height/2 - item height/2)
-        // wheel height = 130, itemHeight=130, মাঝখান আসার জন্য
         let finalTop = -finalPos * itemHeight + (130 / 2 - itemHeight / 2);
         itemsDiv.style.top = finalTop + 'px';
       }, 50);
 
-      // 5 সেকেন্ড পরে resolve করবো
       setTimeout(() => {
         resolve();
       }, 5000);
@@ -351,23 +334,17 @@
 
     clearHighlights();
 
-    // স্পিনের জন্য র‍্যান্ডম ফলাফল
     const finalCard = cards[Math.floor(Math.random() * cards.length)];
     const finalSuit = suits[Math.floor(Math.random() * suits.length)];
 
-    // স্পিন করো দুইটা হুইল
     await Promise.all([
       spinWheel(wheel1, wheel1List, finalCard),
       spinWheel(wheel2, wheel2List, finalSuit)
     ]);
 
-    // স্পিন শেষে ফলাফল দেখাও
-    wheel1.classList.remove('loss');
-    wheel2.classList.remove('loss');
-    wheel1.classList.remove('win');
-    wheel2.classList.remove('win');
+    wheel1.classList.remove('loss', 'win');
+    wheel2.classList.remove('loss', 'win');
 
-    // বেট অনুযায়ী জেতা-হার
     let totalWin = 0;
     let stake = 0;
     let winItems = [];
@@ -387,10 +364,8 @@
     balance += totalWin;
     updateDisplay();
 
-    // বেট হাইলাইট করো
     renderBets(winItems, lostItems);
 
-    // হুইল হাইলাইটিং
     if (winItems.includes(finalCard)) {
       wheel1.classList.add('win');
     } else {
@@ -404,7 +379,6 @@
 
     logRound(finalCard, finalSuit, stake, totalWin);
 
-    // 3 সেকেন্ড পর হাইলাইট মুছে ফেলবে এবং বেট ক্লিয়ার করবে, তারপর বেট নেওয়ার সময় শুরু হবে
     setTimeout(() => {
       clearHighlights();
       selectedBets = {};
@@ -416,7 +390,6 @@
     }, 3000);
   }
 
-  // টাইমার এবং অটো স্পিন
   setInterval(() => {
     if (time > 0 && !isLocked) {
       timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
