@@ -47,6 +47,36 @@
       color: #ffd600;
       min-height: 24px;
     }
+    #betSelector {
+      margin-bottom: 15px;
+      background: #003344;
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #00e5ff80;
+      display: inline-block;
+    }
+    #betSelector label {
+      color: #00e5ff;
+      font-size: 18px;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    select {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      background-color: #00acc1;
+      color: #fff;
+      box-shadow: 0 0 6px #00e5ff80;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    select:focus {
+      outline: none;
+      box-shadow: 0 0 10px #00e5ff;
+      background-color: #0097a7;
+    }
     .wheel-row {
       display: flex;
       justify-content: center;
@@ -108,6 +138,7 @@
       cursor: pointer;
       color: #fff;
       user-select: none;
+      position: relative;
       transition: 0.3s;
     }
     .bet-box.active {
@@ -147,6 +178,27 @@
       background: #888;
       cursor: not-allowed;
     }
+    /* multiplier tag style */
+    .multiplier-tag {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #ffeb3b;
+      color: #000;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ffeb3b;
+      user-select: none;
+      pointer-events: none;
+      animation: pulse 1.5s infinite alternate;
+      z-index: 10;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.3); }
+    }
     #history {
       margin-top: 30px;
       max-width: 500px;
@@ -168,21 +220,50 @@
       margin-bottom: 8px;
       border-bottom: 1px solid #004d40;
       padding-bottom: 4px;
+      transition: background-color 0.3s ease;
     }
-    .win-round { color: #76ff03; }
-    .loss-round { color: #ff5252; }
+    .win-round {
+      color: #76ff03;
+      background-color: rgba(118, 255, 3, 0.15);
+      border-left: 4px solid #76ff03;
+      padding-left: 6px;
+    }
+    .loss-round {
+      color: #ff5252;
+      background-color: rgba(229, 57, 53, 0.15);
+      border-left: 4px solid #e53935;
+      padding-left: 6px;
+    }
+    /* নতুন ক্লাস: স্টেক 0 হলে হলুদ রং এবং ব্যাকগ্রাউন্ড */
+    .warning-round {
+      color: #ffeb3b;
+      font-weight: 700;
+      background: rgba(255, 235, 59, 0.2);
+      border-left: 4px solid #ffeb3b;
+      padding-left: 6px;
+    }
   </style>
 </head>
 <body>
   <h1>👑 Masum King 👑</h1>
-  <div id="balance">Balance: ৳5000</div>
-  <div id="stats">Total Stake: ৳0</div>
+  <div id="balance">Balance: ৳1000</div>
+  <br>
+  
   <div id="timer">⏳ Place your bet... (15s)</div>
 
   <div class="wheel-row">
     <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
     <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
   </div>
+  
+  <div id="betSelector">
+    <label for="betSelect">Bet Amount:</label>
+    <select id="betSelect">
+      <option value="10">৳10</option>
+    </select>
+  </div>
+
+  <div id="stats">Total Stake: ৳0</div>
 
   <div class="bet-container" id="betArea"></div>
 
@@ -201,17 +282,28 @@
   const timerDiv = document.getElementById('timer');
   const betArea = document.getElementById('betArea');
   const roundLog = document.getElementById('roundLog');
+  const betSelect = document.getElementById('betSelect');
 
   let balance = 500;
   let selectedBets = {};
-  const betAmount = 10;
+  let betAmount = parseInt(betSelect.value);
   const maxBetPerItem = 5;
-  const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J'];
+
+  const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J','Z'];
   const suits = ['♠', '♥', '♦', '♣'];
 
-  let time = 15;
-  let isLocked = false;
+  // All unique items for betting (cards + suits)
+  const allItems = [...new Set(cards), ...suits];
 
+  // Multipliers array for random assignment
+  const multipliers = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+
+  betSelect.addEventListener('change', () => {
+    betAmount = parseInt(betSelect.value);
+    renderBets();
+  });
+
+  // Create wheel items list for spinning (repeat items)
   function createWheelItems(items) {
     const list = [];
     for (let i = 0; i < 10; i++) list.push(...items);
@@ -226,11 +318,23 @@
     wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
   }
 
-  const allItems = [...new Set(cards), ...suits];
+  // Game state variables
+  let time = 15;
+  let isLocked = false;
+  let roundCount = 0;
+  let multiplierIndex = null;  // যেই ঘরে multiplier থাকবে তার ইনডেক্স
+  let multiplierValue = 1;     // multiplier মান
+
+  // র‍্যান্ডমভাবে multiplier জন্য ঘর এবং মান সিলেক্ট করা (প্রতি ২ রাউন্ডে)
+  function pickMultiplier() {
+    const idx = Math.floor(Math.random() * allItems.length);
+    const val = multipliers[Math.floor(Math.random() * multipliers.length)];
+    return { idx, val };
+  }
 
   function renderBets(winItems = [], lostItems = []) {
     betArea.innerHTML = '';
-    allItems.forEach((item) => {
+    allItems.forEach((item, idx) => {
       const box = document.createElement('div');
       box.classList.add('bet-box');
       if (selectedBets[item]) box.classList.add('active');
@@ -241,6 +345,7 @@
       box.innerHTML = `
         <h3>${item}</h3>
         <small>৳${betValue * betAmount}</small>
+        ${multiplierIndex === idx ? `<div class="multiplier-tag">${multiplierValue}×</div>` : ''}
         <button onclick="placeBet('${item}')" 
           ${isLocked || betValue >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}>BET</button>
       `;
@@ -268,8 +373,15 @@
   function logRound(card, suit, stake, reward) {
     const entry = document.createElement('div');
     entry.className = 'round-entry';
-    entry.classList.add(reward > stake ? 'win-round' : 'loss-round');
-    entry.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward}`;
+
+    // যদি stake 0 হয়, তাহলে warning-round ক্লাস দিন (হলুদ রং)
+    if(stake === 0) {
+      entry.classList.add('warning-round');
+    } else {
+      entry.classList.add(reward > stake ? 'win-round' : 'loss-round');
+    }
+
+    entry.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward.toFixed(2)}`;
     roundLog.prepend(entry);
   }
 
@@ -316,7 +428,11 @@
     Object.entries(selectedBets).forEach(([bet, count]) => {
       stake += count * betAmount;
       if (bet === finalCard || bet === finalSuit) {
-        totalWin += count * betAmount * 3.5;
+        let multiplier = 3.5; // বেস মুলতুবি পুরস্কার (উদাহরণ)
+        if (multiplierIndex !== null && allItems[multiplierIndex] === bet) {
+          multiplier = multiplierValue; // র্যান্ডম গুণকের মান প্রয়োগ
+        }
+        totalWin += count * betAmount * multiplier;
         winItems.push(bet);
       } else {
         if (count > 0) lostItems.push(bet);
@@ -338,23 +454,37 @@
       selectedBets = {};
       isLocked = false;
       time = 15;
+      multiplierIndex = null;
+      multiplierValue = 1;
       renderBets();
       updateDisplay();
       timerDiv.innerText = `⏳ Place your bet... (${time}s)`;
     }, 3000);
+
+    roundCount++;
   }
 
+  // টাইমার ও multiplier সেটিং
   setInterval(() => {
-    if (time > 0 && !isLocked) {
-      timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
-    } else if (time === 0 && !isLocked) {
-      spinAndResolve();
+    if (!isLocked) {
+      if (time === 10 && roundCount % 2 === 0) {
+        let mul = pickMultiplier();
+        multiplierIndex = mul.idx;
+        multiplierValue = mul.val;
+        renderBets();
+      }
+      if (time > 0) {
+        timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
+      } else if (time === 0) {
+        spinAndResolve();
+      }
     }
   }, 1000);
 
+  // শুরুতে রেন্ডার
   renderWheelItems();
   renderBets();
   updateDisplay();
 </script>
 </body>
-</html>
+  </html>
