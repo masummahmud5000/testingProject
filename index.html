@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Masum Mahmud Limited</title>
+  <title>Masum Matka</title>
   <style>
-    * {
-      margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     body {
       background: #001f2f;
       color: #fff;
@@ -17,475 +15,371 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      overflow-x: hidden;
     }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #00e5ff;
-      text-shadow: 0 0 10px #00e5ff;
-    }
-    #balance {
-      font-size: 22px;
-      margin-bottom: 5px;
-      color: #76ff03;
-      background-color: #1b5e20;
-      display: inline-block;
-      padding: 10px 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #76ff03;
-      min-width: 150px;
-    }
-    #stats {
-      margin: 10px 0;
-      font-size: 16px;
-      color: #80deea;
-      min-width: 300px;
-    }
+    h1 { font-size: 32px; margin-bottom: 10px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
     #timer {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       font-size: 18px;
       color: #ffd600;
       min-height: 24px;
+      transition: all 0.3s ease;
     }
-    #betSelector {
-      margin-bottom: 15px;
-      background: #003344;
-      padding: 10px 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #00e5ff80;
-      display: inline-block;
+    .highlighted {
+      font-size: 27px !important;
+      color: red !important;
+      animation: highlight 1s infinite alternate;
     }
-    #betSelector label {
-      color: #00e5ff;
-      font-size: 18px;
-      margin-right: 10px;
-      font-weight: bold;
-    }
-    select {
-      padding: 8px 14px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
-      background-color: #00acc1;
-      color: #fff;
-      box-shadow: 0 0 6px #00e5ff80;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-    select:focus {
-      outline: none;
-      box-shadow: 0 0 10px #00e5ff;
-      background-color: #0097a7;
-    }
+    @keyframes highlight { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
+
     .wheel-row {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin: 20px auto;
+      display: flex; justify-content: center; gap: 40px; margin: 20px auto;
     }
     .wheel {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
+      width: 130px; height: 130px; border-radius: 50%;
       background: radial-gradient(circle at center, #00acc1, #006064);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 48px;
-      color: #fff;
-      box-shadow: 0 0 15px rgba(255,255,255,0.6);
-      border: 5px solid #fff;
-      user-select: none;
-      position: relative;
-      overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 48px; color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6);
+      border: 5px solid #fff; user-select: none; position: relative; overflow: hidden;
     }
     .wheel .items {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      transition: transform 5s ease-out;
+      position: absolute; top: 0; left: 0; width: 100%;
+      text-align: center; transition: transform 5s ease-out;
     }
     .wheel .item {
-      height: 130px;
-      line-height: 130px;
-      color: #fff;
-      font-size: 50px;
+      height: 130px; line-height: 130px; color: #fff; font-size: 50px;
     }
-    .wheel.win {
-      box-shadow: 0 0 25px 6px #76ff03;
-      border-color: #76ff03;
-    }
-    .wheel.loss {
-      box-shadow: 0 0 25px 6px #e53935;
-      border-color: #e53935;
-    }
+
     .bet-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-      max-width: 480px;
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 10px; margin-top: 20px; max-width: 480px;
     }
     .bet-box {
-      background: #263238;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.4);
-      width: 80px;
-      cursor: pointer;
-      color: #fff;
-      user-select: none;
-      position: relative;
-      transition: 0.3s;
+      background: #263238; padding: 10px; border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4); width: 80px; cursor: pointer;
+      color: #fff; user-select: none; position: relative; transition: 0.3s;
     }
-    .bet-box.active {
-      border: 2px solid #76ff03;
-      background-color: #334e3c;
-    }
+    .bet-box.active { border: 2px solid #76ff03; background-color: #334e3c; }
     .bet-box.win {
-      border: 2px solid #76ff03;
-      background-color: #1b5e20;
+      border: 2px solid #76ff03; background-color: #1b5e20;
       box-shadow: 0 0 15px #76ff03;
     }
     .bet-box.loss {
-      border: 2px solid #e53935;
-      background-color: #4e2626;
+      border: 2px solid #e53935; background-color: #4e2626;
       box-shadow: 0 0 15px #e53935;
     }
-    .bet-box h3 {
-      margin-bottom: 6px;
-      font-size: 20px;
-    }
-    .bet-box small {
-      display: block;
-      color: #fbc02d;
-      margin-bottom: 6px;
-    }
+    .bet-box h3 { margin-bottom: 6px; font-size: 20px; }
+    .bet-box small { display: block; color: #fbc02d; margin-bottom: 6px; }
     .bet-box button {
-      padding: 5px 8px;
-      font-size: 14px;
-      border: none;
-      border-radius: 4px;
-      background: #f57c00;
-      color: white;
-      cursor: pointer;
-      width: 100%;
+      padding: 5px 8px; font-size: 14px; border: none;
+      border-radius: 4px; background: #f57c00; color: white;
+      cursor: pointer; width: 100%;
     }
-    .bet-box button:disabled {
-      background: #888;
-      cursor: not-allowed;
-    }
-    /* multiplier tag style */
+    .bet-box button:disabled { background: #888; cursor: not-allowed; }
+
     .multiplier-tag {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: #ffeb3b;
-      color: #000;
-      font-weight: 700;
-      font-size: 18px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #ffeb3b;
-      user-select: none;
-      pointer-events: none;
-      animation: pulse 1.5s infinite alternate;
+      position: absolute; top: 5px; right: 5px; background: #ffeb3b;
+      color: #000; font-weight: 700; font-size: 18px; padding: 2px 8px;
+      border-radius: 12px; box-shadow: 0 0 10px #ffeb3b;
+      user-select: none; pointer-events: none; animation: pulse 1.5s infinite alternate;
       z-index: 10;
     }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.3); }
+    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.3); } }
+
+    #balanceBox {
+      background: #004d40; color: #76ff03; max-width: 500px; width: 100%;
+      font-size: 20px; padding: 10px 25px; border-radius: 10px; margin: 25px 0 10px;
+      box-shadow: 0 0 15px #00e676; display: flex; justify-content: space-between;
+      align-items: center; position: relative; overflow: visible;
     }
+
     #history {
-      margin-top: 30px;
-      max-width: 500px;
-      width: 100%;
-      background: #0a2c3d;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00796b;
-      overflow-y: auto;
-      max-height: 250px;
-      font-size: 14px;
-      color: #e0f2f1;
+      margin-top: 20px; max-width: 500px; width: 100%;
+      background: #0a2c3d; padding: 15px; border-radius: 10px;
+      box-shadow: 0 0 10px #00796b; overflow-y: auto; max-height: 250px;
+      font-size: 14px; color: #e0f2f1;
     }
-    #history h2 {
-      margin-bottom: 10px;
-      color: #4dd0e1;
-    }
+    #history h2 { margin-bottom: 10px; color: #4dd0e1; }
     .round-entry {
-      margin-bottom: 8px;
-      border-bottom: 1px solid #004d40;
-      padding-bottom: 4px;
-      transition: background-color 0.3s ease;
+      margin-bottom: 8px; border-bottom: 1px solid #004d40;
+      padding-bottom: 4px; transition: background-color 0.3s ease;
     }
     .win-round {
-      color: #76ff03;
-      background-color: rgba(118, 255, 3, 0.15);
-      border-left: 4px solid #76ff03;
-      padding-left: 6px;
+      color: #76ff03; background-color: rgba(118, 255, 3, 0.15);
+      border-left: 4px solid #76ff03; padding-left: 6px;
     }
     .loss-round {
-      color: #ff5252;
-      background-color: rgba(229, 57, 53, 0.15);
-      border-left: 4px solid #e53935;
-      padding-left: 6px;
+      color: #ff5252; background-color: rgba(229, 57, 53, 0.15);
+      border-left: 4px solid #e53935; padding-left: 6px;
     }
-    /* নতুন ক্লাস: স্টেক 0 হলে হলুদ রং এবং ব্যাকগ্রাউন্ড */
     .warning-round {
-      color: #ffeb3b;
-      font-weight: 700;
-      background: rgba(255, 235, 59, 0.2);
-      border-left: 4px solid #ffeb3b;
-      padding-left: 6px;
+      color: #ffeb3b; font-weight: 700; background: rgba(255, 235, 59, 0.2);
+      border-left: 4px solid #ffeb3b; padding-left: 6px;
+    }
+
+    .flying-coin {
+      position: fixed; font-size: 30px; color: #ffd600;
+      z-index: 1000; pointer-events: none; user-select: none;
+      animation: flyToBalance 1.2s forwards ease-in-out;
+    }
+    @keyframes flyToBalance {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(calc(var(--tx, 0px)), calc(var(--ty, 0px))) scale(0.3); }
     }
   </style>
 </head>
 <body>
-  <h1>👑 Masum King 👑</h1>
-  <div id="balance">Balance: ৳1000</div>
-  <br>
-  
-  
+  <h1>🎯 Masum King 🎯</h1>
 
   <div class="wheel-row">
     <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
     <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
   </div>
-  
-  <div id="betSelector">
-    <label for="betSelect">Bet Amount:</label>
-    <select id="betSelect">
-      <option value="10">৳10</option>
-    </select>
-  </div>
-  <div id="timer">⏳ Place your bet... (15s)</div>
 
-  <div id="stats">Total Stake: ৳0</div>
+  <div id="timer">⏳ Place your bet... (15s)</div>
 
   <div class="bet-container" id="betArea"></div>
 
+  <div id="balanceBox">
+    <span id="balance">Balance: ৳500</span>
+    <span id="stakeInfo">Stake: ৳0</span>
+  </div>
+
   <div id="history">
-    <h2>🎰 Round History 🎰</h2>
+    <h2>📝 Round History</h2>
     <div id="roundLog"></div>
   </div>
 
-<script>
-  const balanceDiv = document.getElementById('balance');
-  const statsDiv = document.getElementById('stats');
-  const wheel1 = document.getElementById('wheel1');
-  const wheel2 = document.getElementById('wheel2');
-  const wheel1Items = document.getElementById('wheel1Items');
-  const wheel2Items = document.getElementById('wheel2Items');
-  const timerDiv = document.getElementById('timer');
-  const betArea = document.getElementById('betArea');
-  const roundLog = document.getElementById('roundLog');
-  const betSelect = document.getElementById('betSelect');
+  <script>
+    const balanceSpan = document.getElementById('balance');
+    const wheel1Items = document.getElementById('wheel1Items');
+    const wheel2Items = document.getElementById('wheel2Items');
+    const timerDiv = document.getElementById('timer');
+    const betArea = document.getElementById('betArea');
+    const roundLog = document.getElementById('roundLog');
+    const stakeInfo = document.getElementById('stakeInfo');
+    const balanceBox = document.getElementById('balanceBox');
 
-  let balance = 500;
-  let selectedBets = {};
-  let betAmount = parseInt(betSelect.value);
-  const maxBetPerItem = 5;
+    let balance = 500;
+    let selectedBets = {};
+    let betAmount = 10;
+    const maxBetPerItem = 5;
+    let totalStake = 0;
 
-  const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J','Z'];
-  const suits = ['♠', '♥', '♦', '♣'];
+    const cards = ['K', 'Q', 'J', 'Z', 'K', 'Q', 'J', 'Z'];
+    const suits = ['♠', '♥', '♦', '♣'];
+    const allItems = [...new Set(cards), ...suits];
+    const multipliers = [2, 2.5, 3, 4, 5, 6, 7];
 
-  // All unique items for betting (cards + suits)
-  const allItems = [...new Set(cards), ...suits];
+    let time = 15;
+    let isLocked = false;
+    let roundCount = 0;
+    let multiplierIndex = null;
+    let multiplierValue = 1;
 
-  // Multipliers array for random assignment
-  const multipliers = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
-
-  betSelect.addEventListener('change', () => {
-    betAmount = parseInt(betSelect.value);
-    renderBets();
-  });
-
-  // Create wheel items list for spinning (repeat items)
-  function createWheelItems(items) {
-    const list = [];
-    for (let i = 0; i < 10; i++) list.push(...items);
-    return list;
-  }
-
-  let wheel1List = createWheelItems(cards);
-  let wheel2List = createWheelItems(suits);
-
-  function renderWheelItems() {
-    wheel1Items.innerHTML = wheel1List.map(i => `<div class="item">${i}</div>`).join('');
-    wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
-  }
-
-  // Game state variables
-  let time = 15;
-  let isLocked = false;
-  let roundCount = 0;
-  let multiplierIndex = null;  // যেই ঘরে multiplier থাকবে তার ইনডেক্স
-  let multiplierValue = 1;     // multiplier মান
-
-  // র‍্যান্ডমভাবে multiplier জন্য ঘর এবং মান সিলেক্ট করা (প্রতি ২ রাউন্ডে)
-  function pickMultiplier() {
-    const idx = Math.floor(Math.random() * allItems.length);
-    const val = multipliers[Math.floor(Math.random() * multipliers.length)];
-    return { idx, val };
-  }
-
-  function renderBets(winItems = [], lostItems = []) {
-    betArea.innerHTML = '';
-    allItems.forEach((item, idx) => {
-      const box = document.createElement('div');
-      box.classList.add('bet-box');
-      if (selectedBets[item]) box.classList.add('active');
-      if (winItems.includes(item)) box.classList.add('win');
-      else if (lostItems.includes(item)) box.classList.add('loss');
-
-      const betValue = (selectedBets[item] || 0);
-      box.innerHTML = `
-        <h3>${item}</h3>
-        <small>৳${betValue * betAmount}</small>
-        ${multiplierIndex === idx ? `<div class="multiplier-tag">${multiplierValue}×</div>` : ''}
-        <button onclick="placeBet('${item}')" 
-          ${isLocked || betValue >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}>BET</button>
-      `;
-      betArea.appendChild(box);
-    });
-  }
-
-  function placeBet(item) {
-    if (isLocked) return;
-    if (!selectedBets[item]) selectedBets[item] = 0;
-    if (selectedBets[item] >= maxBetPerItem) return alert('Max bet!');
-    if (balance < betAmount) return alert('Not enough balance!');
-    selectedBets[item]++;
-    balance -= betAmount;
-    updateDisplay();
-    renderBets();
-  }
-
-  function updateDisplay() {
-    balanceDiv.innerText = `Balance: ৳${balance}`;
-    const stake = Object.values(selectedBets).reduce((a, b) => a + b, 0) * betAmount;
-    statsDiv.innerText = `Total Stake: ৳${stake}`;
-  }
-
-  function logRound(card, suit, stake, reward) {
-    const entry = document.createElement('div');
-    entry.className = 'round-entry';
-
-    // যদি stake 0 হয়, তাহলে warning-round ক্লাস দিন (হলুদ রং)
-    if(stake === 0) {
-      entry.classList.add('warning-round');
-    } else {
-      entry.classList.add(reward > stake ? 'win-round' : 'loss-round');
+    function createWheelItems(items) {
+      const list = [];
+      for (let i = 0; i < 10; i++) list.push(...items);
+      return list;
     }
 
-    entry.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward.toFixed(2)}`;
-    roundLog.prepend(entry);
-  }
+    let wheel1List = createWheelItems(cards);
+    let wheel2List = createWheelItems(suits);
 
-  function clearHighlights() {
-    wheel1.classList.remove('win', 'loss');
-    wheel2.classList.remove('win', 'loss');
-    document.querySelectorAll('.bet-box').forEach(box => {
-      box.classList.remove('win', 'loss');
-    });
-  }
+    function renderWheelItems() {
+      wheel1Items.innerHTML = wheel1List.map(i => `<div class="item">${i}</div>`).join('');
+      wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
+    }
 
-  function spinWheel(wheelElement, itemsList, finalItem) {
-    return new Promise(resolve => {
-      const itemHeight = wheelElement.offsetHeight;
-      const itemsDiv = wheelElement.querySelector('.items');
-      let indexes = itemsList.map((v, i) => v === finalItem ? i : -1).filter(i => i !== -1);
-      let finalIndex = indexes[indexes.length - 1];
-      itemsDiv.style.transition = 'none';
-      itemsDiv.style.transform = 'translateY(0)';
-      setTimeout(() => {
-        itemsDiv.style.transition = 'transform 5s ease-out';
-        itemsDiv.style.transform = `translateY(-${finalIndex * itemHeight}px)`;
-      }, 50);
-      setTimeout(resolve, 5000);
-    });
-  }
+    function renderBets(winItems = [], lostItems = []) {
+      betArea.innerHTML = '';
+      allItems.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'bet-box';
+        if (selectedBets[item]) box.classList.add('active');
+        if (winItems.includes(item)) box.classList.add('win');
+        else if (lostItems.includes(item)) box.classList.add('loss');
 
-  async function spinAndResolve() {
-    if (isLocked) return;
-    isLocked = true;
-    timerDiv.innerText = '🎯 Spinning...';
-    clearHighlights();
+        const betVal = selectedBets[item] || 0;
+        box.innerHTML = `
+          <h3>${item}</h3>
+          <small>৳${betVal * betAmount}</small>
+          ${multiplierIndex === idx ? `<div class="multiplier-tag">${multiplierValue}×</div>` : ''}
+          <button onclick="placeBet('${item}')" 
+            ${isLocked || betVal >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}>BET</button>
+        `;
+        betArea.appendChild(box);
+      });
+    }
 
-    const finalCard = cards[Math.floor(Math.random() * cards.length)];
-    const finalSuit = suits[Math.floor(Math.random() * suits.length)];
-
-    await Promise.all([
-      spinWheel(wheel1, wheel1List, finalCard),
-      spinWheel(wheel2, wheel2List, finalSuit)
-    ]);
-
-    let totalWin = 0, stake = 0, winItems = [], lostItems = [];
-
-    Object.entries(selectedBets).forEach(([bet, count]) => {
-      stake += count * betAmount;
-      if (bet === finalCard || bet === finalSuit) {
-        let multiplier = 3.5; // বেস মুলতুবি পুরস্কার (উদাহরণ)
-        if (multiplierIndex !== null && allItems[multiplierIndex] === bet) {
-          multiplier = multiplierValue; // র্যান্ডম গুণকের মান প্রয়োগ
-        }
-        totalWin += count * betAmount * multiplier;
-        winItems.push(bet);
-      } else {
-        if (count > 0) lostItems.push(bet);
-      }
-    });
-
-    balance += totalWin;
-    updateDisplay();
-    renderBets(winItems, lostItems);
-    if (winItems.includes(finalCard)) wheel1.classList.add('win');
-    else wheel1.classList.add('loss');
-    if (winItems.includes(finalSuit)) wheel2.classList.add('win');
-    else wheel2.classList.add('loss');
-
-    logRound(finalCard, finalSuit, stake, totalWin);
-
-    setTimeout(() => {
-      clearHighlights();
-      selectedBets = {};
-      isLocked = false;
-      time = 15;
-      multiplierIndex = null;
-      multiplierValue = 1;
-      renderBets();
+    function placeBet(item) {
+      if (isLocked || balance < betAmount) return;
+      if (!selectedBets[item]) selectedBets[item] = 0;
+      if (selectedBets[item] >= maxBetPerItem) return;
+      selectedBets[item]++;
+      balance -= betAmount;
       updateDisplay();
-      timerDiv.innerText = `⏳ Place your bet... (${time}s)`;
-    }, 3000);
-
-    roundCount++;
-  }
-
-  // টাইমার ও multiplier সেটিং
-  setInterval(() => {
-    if (!isLocked) {
-      if (time === 10 && roundCount % 2 === 0) {
-        let mul = pickMultiplier();
-        multiplierIndex = mul.idx;
-        multiplierValue = mul.val;
-        renderBets();
-      }
-      if (time > 0) {
-        timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
-      } else if (time === 0) {
-        spinAndResolve();
-      }
+      renderBets();
     }
-  }, 1000);
 
-  // শুরুতে রেন্ডার
-  renderWheelItems();
-  renderBets();
-  updateDisplay();
-</script>
+    function updateDisplay() {
+      balanceSpan.innerText = `Balance: ৳${balance}`;
+      totalStake = Object.values(selectedBets).reduce((sum, val) => sum + val * betAmount, 0);
+      stakeInfo.innerText = `Stake: ৳${totalStake}`;
+    }
+
+    function logRound(card, suit, stake, reward) {
+      const div = document.createElement('div');
+      div.className = 'round-entry';
+      if (stake === 0) div.classList.add('warning-round');
+      else div.classList.add(reward > stake ? 'win-round' : 'loss-round');
+      div.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward.toFixed(2)}`;
+      roundLog.prepend(div);
+    }
+
+    function spinWheel(wheel, list, result) {
+      return new Promise(resolve => {
+        const itemHeight = wheel.offsetHeight;
+        const itemsDiv = wheel.querySelector('.items');
+        const idx = [...list].map((v, i) => v === result ? i : -1).filter(i => i !== -1).pop();
+        itemsDiv.style.transition = 'none';
+        itemsDiv.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          itemsDiv.style.transition = 'transform 5s ease-out';
+          itemsDiv.style.transform = `translateY(-${idx * itemHeight}px)`;
+        }, 50);
+        setTimeout(resolve, 5000);
+      });
+    }
+
+    function flyCoin(fromElement, amount, isWin = true) {
+      const coin = document.createElement('div');
+      coin.className = 'flying-coin';
+      coin.textContent = (isWin ? '💰+' : '💸-') + amount;
+      document.body.appendChild(coin);
+
+      const fromRect = fromElement.getBoundingClientRect();
+      const toRect = balanceBox.getBoundingClientRect();
+      const startX = fromRect.left + fromRect.width / 2;
+      const startY = fromRect.top + fromRect.height / 2;
+      let endX, endY;
+
+      if (isWin) {
+        endX = toRect.left + toRect.width - 40;
+        endY = toRect.top + toRect.height / 2;
+      } else {
+        // হারলে, টাকার animation উপরে থেকে দূরে উড়ে যাবে (স্ক্রিন থেকে বাইরে)
+        endX = startX + (Math.random() * 300 - 150);
+        endY = startY - 200 - Math.random() * 100;
+      }
+
+      coin.style.left = startX + 'px';
+      coin.style.top = startY + 'px';
+      coin.style.setProperty('--tx', (endX - startX) + 'px');
+      coin.style.setProperty('--ty', (endY - startY) + 'px');
+
+      coin.addEventListener('animationend', () => {
+        coin.remove();
+      });
+    }
+
+    async function spinAndResolve() {
+      isLocked = true;
+      timerDiv.innerText = '🎲 Spinning...';
+      timerDiv.classList.remove("highlighted");
+      timerDiv.style.fontSize = "18px";
+      timerDiv.style.color = "#ffd600";
+
+      const card = cards[Math.floor(Math.random() * cards.length)];
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+
+      await Promise.all([
+        spinWheel(document.getElementById('wheel1'), wheel1List, card),
+        spinWheel(document.getElementById('wheel2'), wheel2List, suit)
+      ]);
+
+      let totalWin = 0, stake = 0, winItems = [], lostItems = [];
+
+      Object.entries(selectedBets).forEach(([item, count]) => {
+        const bet = count * betAmount;
+        stake += bet;
+        if (item === card || item === suit) {
+          let multi = 3.5;
+          if (multiplierIndex !== null && allItems[multiplierIndex] === item) {
+            multi = multiplierValue;
+          }
+          totalWin += bet * multi;
+          winItems.push(item);
+        } else if (count > 0) lostItems.push(item);
+      });
+
+      // Animation for win and loss
+      const betBoxes = document.querySelectorAll('.bet-box');
+
+      if (totalWin > stake) {
+        // Win: Coin flies from bet box to balance box
+        winItems.forEach(winItem => {
+          betBoxes.forEach(box => {
+            if (box.querySelector('h3').textContent === winItem) {
+              flyCoin(box, Math.round(selectedBets[winItem] * betAmount));
+            }
+          });
+        });
+      } else {
+        // Loss: Coin flies out from lost bet box
+        lostItems.forEach(lostItem => {
+          betBoxes.forEach(box => {
+            if (box.querySelector('h3').textContent === lostItem) {
+              flyCoin(box, Math.round(selectedBets[lostItem] * betAmount), false);
+            }
+          });
+        });
+      }
+
+      balance += totalWin;
+      updateDisplay();
+      renderBets(winItems, lostItems);
+      logRound(card, suit, stake, totalWin);
+
+      setTimeout(() => {
+        selectedBets = {};
+        time = 15;
+        isLocked = false;
+        multiplierIndex = null;
+        multiplierValue = 1;
+        renderBets();
+        updateDisplay();
+        timerDiv.innerText = `⏳ Place your bet... (${time}s)`;
+      }, 3000);
+
+      roundCount++;
+    }
+
+    function pickMultiplier() {
+      const idx = Math.floor(Math.random() * allItems.length);
+      const val = multipliers[Math.floor(Math.random() * multipliers.length)];
+      return { idx, val };
+    }
+
+    setInterval(() => {
+      if (!isLocked) {
+        if (time === 10 && roundCount % 2 === 0) {
+          const mul = pickMultiplier();
+          multiplierIndex = mul.idx;
+          multiplierValue = mul.val;
+          renderBets();
+        }
+        if (time === 5) timerDiv.classList.add("highlighted");
+
+        if (time > 0) timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
+        else if (time === 0) spinAndResolve();
+      }
+    }, 1000);
+
+    renderWheelItems();
+    renderBets();
+    updateDisplay();
+  </script>
 </body>
-  </html>
+</html>
