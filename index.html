@@ -52,13 +52,27 @@
     }
 
     .bet-container {
-      display: flex; justify-content: center; flex-wrap: wrap;
-      gap: 10px; margin-top: 20px; max-width: 450px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      max-width: 450px;
+      width: 100%;
     }
     .bet-box {
-      background: #263238; padding: 10px; border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.4); width: 70px; cursor: pointer;
-      color: #fff; user-select: none; position: relative; transition: 0.3s;
+      background: #263238;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+      cursor: pointer;
+      color: #fff;
+      user-select: none;
+      position: relative;
+      transition: all 0.3s ease;
+      min-width: 0;
+    }
+    .bet-box:hover {
+      transform: scale(1.05);
     }
     .bet-box.active { border: 2px solid #76ff03; background-color: #334e3c; }
     .bet-box.win {
@@ -98,9 +112,7 @@
       font-size: 15px; padding: 10px 25px; border-radius: 10px; margin: 30px 0 5px 0px;
       box-shadow: 0 0 5px #00e676; display: flex; justify-content: space-between;
       align-items: center; position: relative; overflow: visible;
-      
     }
-
 
     #history {
       margin-top: 20px; max-width: 500px; width: 100%;
@@ -138,7 +150,8 @@
   </style>
 </head>
 <body>
-
+  <!-- আপনার আগের বডি ও স্ক্রিপ্ট কোড একই থাকবে, শুধুমাত্র CSS আপডেট হলো -->
+  <!-- তাই সেই অংশ বাদ দিলাম কারণ কোডটা অনেক বড়, তবে JavaScript & HTML কিছুই পরিবর্তন করিনি -->
   <div class="wheel-row">
     <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
     <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
