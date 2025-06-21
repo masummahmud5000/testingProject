@@ -20,11 +20,11 @@
     }
     h1 { font-size: 32px; margin-bottom: 10px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
     #timer {
-      margin-bottom: 10px;
-      font-size: 18px;
+      margin-bottom: 5px;
+      font-size: 20px;
       color: #ffd600;
-      min-height: 24px;
-      transition: all 0.3s ease;
+      min-height: 20px;
+      transition: all 0.5s ease;
     }
     .highlighted {
       font-size: 27px !important;
@@ -53,11 +53,11 @@
 
     .bet-container {
       display: flex; justify-content: center; flex-wrap: wrap;
-      gap: 10px; margin-top: 20px; max-width: 480px;
+      gap: 10px; margin-top: 20px; max-width: 450px;
     }
     .bet-box {
       background: #263238; padding: 10px; border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.4); width: 80px; cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4); width: 70px; cursor: pointer;
       color: #fff; user-select: none; position: relative; transition: 0.3s;
     }
     .bet-box.active { border: 2px solid #76ff03; background-color: #334e3c; }
@@ -93,6 +93,14 @@
       box-shadow: 0 0 15px #00e676; display: flex; justify-content: space-between;
       align-items: center; position: relative; overflow: visible;
     }
+    #userBox {
+      background: #001f2f; color: #76ff03; max-width: 500px; width: 100%;
+      font-size: 15px; padding: 10px 25px; border-radius: 10px; margin: 30px 0 5px 0px;
+      box-shadow: 0 0 5px #00e676; display: flex; justify-content: space-between;
+      align-items: center; position: relative; overflow: visible;
+      
+    }
+
 
     #history {
       margin-top: 20px; max-width: 500px; width: 100%;
@@ -130,17 +138,19 @@
   </style>
 </head>
 <body>
-  <h1>🎯 Masum King 🎯</h1>
 
   <div class="wheel-row">
     <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
     <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
   </div>
-
-  <div id="timer">⏳ Place your bet... (15s)</div>
+  <div id="userBox">
+    <span>Owner: masum@000</span>
+    <span id="timer">Timer</span>
+  </div>
+  
 
   <div class="bet-container" id="betArea"></div>
-
+  
   <div id="balanceBox">
     <span id="balance">Balance: ৳500</span>
     <span id="stakeInfo">Stake: ৳0</span>
@@ -350,7 +360,7 @@
         multiplierValue = 1;
         renderBets();
         updateDisplay();
-        timerDiv.innerText = `⏳ Place your bet... (${time}s)`;
+        timerDiv.innerText = `Place bet: ${time}`;
       }, 3000);
 
       roundCount++;
@@ -372,7 +382,7 @@
         }
         if (time === 5) timerDiv.classList.add("highlighted");
 
-        if (time > 0) timerDiv.innerText = `⏳ Place your bet... (${time--}s)`;
+        if (time > 0) timerDiv.innerText = `Place bet: ${time--}`;
         else if (time === 0) spinAndResolve();
       }
     }, 1000);
