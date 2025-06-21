@@ -147,11 +147,15 @@
       0% { opacity: 1; transform: translate(0, 0) scale(1); }
       100% { opacity: 0; transform: translate(calc(var(--tx, 0px)), calc(var(--ty, 0px))) scale(0.3); }
     }
+
+    /* pull-to-refresh বন্ধ করার জন্য */
+    html, body {
+      overscroll-behavior-y: contain;
+      touch-action: pan-x pan-y;
+    }
   </style>
 </head>
 <body>
-  <!-- আপনার আগের বডি ও স্ক্রিপ্ট কোড একই থাকবে, শুধুমাত্র CSS আপডেট হলো -->
-  <!-- তাই সেই অংশ বাদ দিলাম কারণ কোডটা অনেক বড়, তবে JavaScript & HTML কিছুই পরিবর্তন করিনি -->
   <div class="wheel-row">
     <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
     <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
@@ -160,10 +164,9 @@
     <span>Owner: masum@000</span>
     <span id="timer">Timer</span>
   </div>
-  
 
   <div class="bet-container" id="betArea"></div>
-  
+
   <div id="balanceBox">
     <span id="balance">Balance: ৳500</span>
     <span id="stakeInfo">Stake: ৳0</span>
@@ -292,7 +295,6 @@
         endX = toRect.left + toRect.width - 40;
         endY = toRect.top + toRect.height / 2;
       } else {
-        // হারলে, টাকার animation উপরে থেকে দূরে উড়ে যাবে (স্ক্রিন থেকে বাইরে)
         endX = startX + (Math.random() * 300 - 150);
         endY = startY - 200 - Math.random() * 100;
       }
@@ -337,11 +339,9 @@
         } else if (count > 0) lostItems.push(item);
       });
 
-      // Animation for win and loss
       const betBoxes = document.querySelectorAll('.bet-box');
 
       if (totalWin > stake) {
-        // Win: Coin flies from bet box to balance box
         winItems.forEach(winItem => {
           betBoxes.forEach(box => {
             if (box.querySelector('h3').textContent === winItem) {
@@ -350,7 +350,6 @@
           });
         });
       } else {
-        // Loss: Coin flies out from lost bet box
         lostItems.forEach(lostItem => {
           betBoxes.forEach(box => {
             if (box.querySelector('h3').textContent === lostItem) {
@@ -403,6 +402,9 @@
     renderWheelItems();
     renderBets();
     updateDisplay();
-  </script>
+
+
+    // pull-to-refresh বন্ধ করার জন্য নিচের
+    </script>
 </body>
 </html>
