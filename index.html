@@ -187,9 +187,9 @@
     const stakeInfo = document.getElementById('stakeInfo');
     const balanceBox = document.getElementById('balanceBox');
 
-    let balance = 500;
+    let balance = 10;
     let selectedBets = {};
-    let betAmount = 10;
+    let betAmount = 1;
     const maxBetPerItem = 5;
     let totalStake = 0;
 
@@ -330,7 +330,7 @@
         const bet = count * betAmount;
         stake += bet;
         if (item === card || item === suit) {
-          let multi = 3.5;
+          let multi = 2.7;
           if (multiplierIndex !== null && allItems[multiplierIndex] === item) {
             multi = multiplierValue;
           }
