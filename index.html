@@ -168,7 +168,7 @@
   <div class="bet-container" id="betArea"></div>
 
   <div id="balanceBox">
-    <span id="balance">Balance: ৳5000000</span>
+    <span id="balance">Balance: ৳00</span>
     <span id="stakeInfo">Stake: ৳0</span>
   </div>
 
@@ -187,7 +187,7 @@
     const stakeInfo = document.getElementById('stakeInfo');
     const balanceBox = document.getElementById('balanceBox');
 
-    let balance = 10;
+    let balance = 1000;
     let selectedBets = {};
     let betAmount = 1;
     const maxBetPerItem = 5;
@@ -330,7 +330,7 @@
         const bet = count * betAmount;
         stake += bet;
         if (item === card || item === suit) {
-          let multi = 2.7;
+          let multi = 3.5;
           if (multiplierIndex !== null && allItems[multiplierIndex] === item) {
             multi = multiplierValue;
           }
