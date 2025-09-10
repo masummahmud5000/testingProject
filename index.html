@@ -1,318 +1,410 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<title>Masum Software Limited</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; }
-h2 { text-align: center; color: #333; margin-bottom: 15px; }
-h1 { text-align: center; color: red; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Masum Matka</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: #001f2f;
+      color: #fff;
+      text-align: center;
+      padding: 20px 10px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+    h1 { font-size: 32px; margin-bottom: 10px; color: #00e5ff; text-shadow: 0 0 10px #00e5ff; }
+    #timer {
+      margin-bottom: 5px;
+      font-size: 20px;
+      color: #ffd600;
+      min-height: 20px;
+      transition: all 0.5s ease;
+    }
+    .highlighted {
+      font-size: 27px !important;
+      color: red !important;
+      animation: highlight 1s infinite alternate;
+    }
+    @keyframes highlight { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
 
-.today-date { text-align: center; background: green; color: white; padding: 8px; border-radius: 8px; max-width: 200px; margin: 10px auto; font-weight: bold; }
-.form-box { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); max-width: 650px; margin: auto; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .wheel-row {
+      display: flex; justify-content: center; gap: 40px; margin: 20px auto;
+    }
+    .wheel {
+      width: 130px; height: 130px; border-radius: 50%;
+      background: radial-gradient(circle at center, #00acc1, #006064);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 48px; color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.6);
+      border: 5px solid #fff; user-select: none; position: relative; overflow: hidden;
+    }
+    .wheel .items {
+      position: absolute; top: 0; left: 0; width: 100%;
+      text-align: center; transition: transform 5s ease-out;
+    }
+    .wheel .item {
+      height: 130px; line-height: 130px; color: #fff; font-size: 50px;
+    }
 
-.search-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
-input, select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
-button { grid-column: span 2; padding: 12px; background: linear-gradient(90deg, #28a745, #218838); color: #fff; cursor: pointer; font-weight: bold; border: none; border-radius: 8px; font-size: 15px; transition: 0.3s; }
-button:hover { background: linear-gradient(90deg, #218838, #1c7430); }
+    .bet-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      max-width: 450px;
+      width: 100%;
+    }
+    .bet-box {
+      background: #263238;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+      cursor: pointer;
+      color: #fff;
+      user-select: none;
+      position: relative;
+      transition: all 0.3s ease;
+      min-width: 0;
+    }
+    .bet-box:hover {
+      transform: scale(1.05);
+    }
+    .bet-box.active { border: 2px solid #76ff03; background-color: #334e3c; }
+    .bet-box.win {
+      border: 2px solid #76ff03; background-color: #1b5e20;
+      box-shadow: 0 0 15px #76ff03;
+    }
+    .bet-box.loss {
+      border: 2px solid #e53935; background-color: #4e2626;
+      box-shadow: 0 0 15px #e53935;
+    }
+    .bet-box h3 { margin-bottom: 6px; font-size: 20px; }
+    .bet-box small { display: block; color: #fbc02d; margin-bottom: 6px; }
+    .bet-box button {
+      padding: 5px 8px; font-size: 14px; border: none;
+      border-radius: 4px; background: #f57c00; color: white;
+      cursor: pointer; width: 100%;
+    }
+    .bet-box button:disabled { background: #888; cursor: not-allowed; }
 
-.summary, .system-summary { max-width: 650px; margin: 10px auto; padding: 15px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 15px; font-weight: bold; text-align: center; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; }
-.cards { max-width: 650px; margin: 20px auto; }
-.card { background: #fff; padding: 14px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 13px; margin-bottom: 10px; position: relative; cursor: pointer; }
-.card.selected { border: 2px solid red; }
-.card h3 { margin: 0; font-size: 16px; color: #333; margin-bottom: 5px; }
-.card p { margin: 3px 0; color: #222; font-weight: 500; }
-.status { font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 12px; display: inline-block; }
-.pending { background: #ffc107; color: #000; }
-.paid { background: #28a745; color: #fff; }
-.loss-text { color: red; font-weight: bold; }
-.actions { margin-top: 10px; }
-.action-btn { background: #007bff; border: none; color: white; padding: 6px 10px; cursor: pointer; border-radius: 6px; font-size: 12px; margin-right: 4px; }
-.delete-btn { background: #dc3545; }
+    .multiplier-tag {
+      position: absolute; top: 5px; right: 5px; background: #ffeb3b;
+      color: #000; font-weight: 700; font-size: 18px; padding: 2px 8px;
+      border-radius: 12px; box-shadow: 0 0 10px #ffeb3b;
+      user-select: none; pointer-events: none; animation: pulse 1.5s infinite alternate;
+      z-index: 10;
+    }
+    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.3); } }
 
-/* এরিয়া ব্যাকগ্রাউন্ড */
-.area-2nb { background: #d9f0ff; }       
-.area-ansar { background: #d4f8d4; }     
-.area-master { background: #ffe5b4; }    
-.area-aman { background: #f2e1ff; }      
-.area-shreepur { background: #ffd6e7; }  
-.area-aspara { background: #e0f7fa; }    
-.area-other { background: #f5f5f5; }  
-.area-input { background: #e6ffe6; }  
-.area-out { background: #ffe6e6; }  
-</style>
+    #balanceBox {
+      background: #004d40; color: #76ff03; max-width: 500px; width: 100%;
+      font-size: 20px; padding: 10px 25px; border-radius: 10px; margin: 25px 0 10px;
+      box-shadow: 0 0 15px #00e676; display: flex; justify-content: space-between;
+      align-items: center; position: relative; overflow: visible;
+    }
+    #userBox {
+      background: #001f2f; color: #76ff03; max-width: 500px; width: 100%;
+      font-size: 15px; padding: 10px 25px; border-radius: 10px; margin: 30px 0 5px 0px;
+      box-shadow: 0 0 5px #00e676; display: flex; justify-content: space-between;
+      align-items: center; position: relative; overflow: visible;
+    }
+
+    #history {
+      margin-top: 20px; max-width: 500px; width: 100%;
+      background: #0a2c3d; padding: 15px; border-radius: 10px;
+      box-shadow: 0 0 10px #00796b; overflow-y: auto; max-height: 250px;
+      font-size: 14px; color: #e0f2f1;
+    }
+    #history h2 { margin-bottom: 10px; color: #4dd0e1; }
+    .round-entry {
+      margin-bottom: 8px; border-bottom: 1px solid #004d40;
+      padding-bottom: 4px; transition: background-color 0.3s ease;
+    }
+    .win-round {
+      color: #76ff03; background-color: rgba(118, 255, 3, 0.15);
+      border-left: 4px solid #76ff03; padding-left: 6px;
+    }
+    .loss-round {
+      color: #ff5252; background-color: rgba(229, 57, 53, 0.15);
+      border-left: 4px solid #e53935; padding-left: 6px;
+    }
+    .warning-round {
+      color: #ffeb3b; font-weight: 700; background: rgba(255, 235, 59, 0.2);
+      border-left: 4px solid #ffeb3b; padding-left: 6px;
+    }
+
+    .flying-coin {
+      position: fixed; font-size: 30px; color: #ffd600;
+      z-index: 1000; pointer-events: none; user-select: none;
+      animation: flyToBalance 1.2s forwards ease-in-out;
+    }
+    @keyframes flyToBalance {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(calc(var(--tx, 0px)), calc(var(--ty, 0px))) scale(0.3); }
+    }
+
+    /* pull-to-refresh বন্ধ করার জন্য */
+    html, body {
+      overscroll-behavior-y: contain;
+      touch-action: pan-x pan-y;
+    }
+  </style>
 </head>
 <body>
-  <h1>Admin GM</h1>
-<marquee><h2>মাসুম মাহমুদ সফটওয়ার ফাউন্ডেশন || Masum Mahmud Software Foundation</h2></marquee>
-<h2>🐣 মেসার্স মাসুদ ট্রেডার্স </h2>
-
-<div class="today-date" id="todayDate"></div>
-
-<!-- 🔍 সার্চ বক্স -->
-<div class="form-box search-box">
-  <input type="date" id="searchDate">
-  <input type="text" id="searchName" placeholder="ক্রেতার নাম দিয়ে সার্চ করুন">
-  <select id="searchArea">
-    <option value="">সব এরিয়া</option>
-    <option value="২নং সি এন্ড বি">২নং সি এন্ড বি</option>
-    <option value="আনসার রোড">আনসার রোড</option>
-    <option value="মাস্টার বাড়ি">মাস্টার বাড়ি</option>
-    <option value="আমান সংলগ্ন">আমান সংলগ্ন</option>
-    <option value="শ্রীপুর">শ্রীপুর</option>
-    <option value="আসপাড়া">আসপাড়া</option>
-    <option value="অন্যান্য">অন্যান্য</option>
-    <option value="এখানে প্রলটি">🟢 এখানে প্রলটি</option>
-    <option value="এখানে ডিম নেমেছে">🔴 এখানে ডিম নেমেছে</option>
-  </select>
-  <select id="searchStatus">
-    <option value="">সব দেখাও</option>
-    <option value="Pending">Pending</option>
-    <option value="Paid">Paid</option>
-  </select>
-  <button style="background:#007bff;" onclick="searchRecords()">🔍 সার্চ</button>
-  <button style="background:#6c757d;" onclick="resetSearch()">♻️ Reset</button>
-</div>
-
-<!-- 📋 ফর্ম -->
-<div class="form-box">
-  <div class="form-grid">
-    <input type="text" id="name" placeholder="ক্রেতার নাম">
-    <input type="number" id="eggs" placeholder="কত ডিম">
-    <input type="number" id="rate" placeholder="রেট">
-    <button style="grid-column: span 1; background:#6f42c1;" onclick="saveRate()">💾 Save Rate</button>
-    <select id="area" onchange="toggleRateBox()">
-      <option value="২নং সি এন্ড বি">২নং সি এন্ড বি</option>
-      <option value="আনসার রোড">আনসার রোড</option>
-      <option value="মাস্টার বাড়ি">মাস্টার বাড়ি</option>
-      <option value="আমান সংলগ্ন">আমান সংলগ্ন</option>
-      <option value="শ্রীপুর">শ্রীপুর</option>
-      <option value="আসপাড়া">আসপাড়া</option>
-      <option value="অন্যান্য">অন্যান্য</option>
-      <option value="এখানে প্রলটি">🟢 এখানে প্রলটি</option>
-      <option value="এখানে ডিম নেমেছে">🔴 এখানে ডিম নেমেছে</option>
-    </select>
-    <input type="text" id="customArea" placeholder="এখানে এরিয়া লিখুন" style="display:none;">
-    <select id="status" onchange="togglePaidBox()">
-      <option value="Pending">Pending</option>
-      <option value="Paid">Paid</option>
-    </select>
-    <input type="number" id="receivedAmount" placeholder="কত টাকা" style="display:none;">
-    <button onclick="addRecord()">➕ হিসাব যোগ করুন</button>
+  <div class="wheel-row">
+    <div class="wheel" id="wheel1"><div class="items" id="wheel1Items"></div></div>
+    <div class="wheel" id="wheel2"><div class="items" id="wheel2Items"></div></div>
   </div>
-</div>
+  <div id="userBox">
+    <span>Owner: Masum Mahmud</span>
+    <span id="timer">Timer</span>
+  </div>
 
-<div class="summary">
-  <div>Pending: <span id="pendingTotal">0</span>৳</div>
-  <div>Paid: <span id="paidTotal">0</span>৳</div>
-</div>
+  <div class="bet-container" id="betArea"></div>
 
-<div class="system-summary">
-  <div>মোট ক্রেতা: <span id="buyerCount">0</span> জন</div>
-  <div>মোট ডিম: <span id="eggCount">0</span> টি</div>
-  <div style="color:red;">মোট লস: <span id="lossAmount">0</span>৳</div>
-</div>
+  <div id="balanceBox">
+    <span id="balance">Balance: ৳00</span>
+    <span id="stakeInfo">Stake: ৳0</span>
+  </div>
 
-<button style="background:#dc3545; display:none;" id="deleteSelectedBtn" onclick="deleteSelected()">🗑️ সিলেক্টেড ডিলেট</button>
+  <div id="history">
+    <h2>📝 Round History</h2>
+    <div id="roundLog"></div>
+  </div>
 
-<div class="cards" id="cardContainer"></div>
+  <script>
+    const balanceSpan = document.getElementById('balance');
+    const wheel1Items = document.getElementById('wheel1Items');
+    const wheel2Items = document.getElementById('wheel2Items');
+    const timerDiv = document.getElementById('timer');
+    const betArea = document.getElementById('betArea');
+    const roundLog = document.getElementById('roundLog');
+    const stakeInfo = document.getElementById('stakeInfo');
+    const balanceBox = document.getElementById('balanceBox');
 
-<script>
-let records = JSON.parse(localStorage.getItem("records")) || [];
-let editIndex = -1;
-let selectedCards = new Set();
-let savedRate = localStorage.getItem("savedRate") || "";
+    let balance = 1000;
+    let selectedBets = {};
+    let betAmount = 10;
+    const maxBetPerItem = 5;
+    let totalStake = 0;
 
-if(savedRate) document.getElementById("rate").value = savedRate;
+    const cards = ['A','B','C','D'];
+    const suits = ['♠', '♥', '♦', '♣'];
+    const allItems = [...new Set(cards), ...suits];
+    const multipliers = [2, 2.5, 3, 4, 5, 6, 7];
 
-function saveRate(){
-  const r=document.getElementById("rate").value;
-  if(r){
-    localStorage.setItem("savedRate",r);
-    alert("✅ রেট সেভ হয়েছে!");
-  }
-}
+    let time = 15;
+    let isLocked = false;
+    let roundCount = 0;
+    let multiplierIndex = null;
+    let multiplierValue = 1;
 
-function toggleRateBox(){
-  const area=document.getElementById("area").value;
-  const rateBox=document.getElementById("rate");
-  const customAreaBox=document.getElementById("customArea");
-  rateBox.disabled=(area==="এখানে প্রলটি"||area==="এখানে ডিম নেমেছে");
-  if(rateBox.disabled) rateBox.value="";
-  if(area==="অন্যান্য") customAreaBox.style.display="block";
-  else { customAreaBox.style.display="none"; customAreaBox.value=""; }
-}
-
-function togglePaidBox(){
-  const status=document.getElementById("status").value;
-  document.getElementById("receivedAmount").style.display=(status==="Paid")?"block":"none";
-}
-
-function addRecord(){
-  const name=document.getElementById("name").value.trim();
-  const eggs=parseFloat(document.getElementById("eggs").value)||0;
-  const rate=parseFloat(document.getElementById("rate").value)||0;
-  let area=document.getElementById("area").value;
-  if(area==="অন্যান্য") area=document.getElementById("customArea").value.trim() || "অন্যান্য";
-  const status=document.getElementById("status").value;
-  const received=document.getElementById("receivedAmount").value;
-
-  let date,time;
-  if(editIndex>-1){ date=records[editIndex].date; time=records[editIndex].time; }
-  else {
-    const now=new Date();
-    date=`${String(now.getDate()).padStart(2,"0")}/${String(now.getMonth()+1).padStart(2,"0")}/${now.getFullYear()}`;
-    time=now.toLocaleTimeString("us-US",{hour:'2-digit',minute:'2-digit',hour12:true});
-  }
-  const total=(area==="এখানে প্রলটি"||area==="এখানে ডিম নেমেছে")?0:((rate/100)*eggs).toFixed(2);
-  const record={name,eggs,rate,area,status,received,total,date,time};
-  if(editIndex>-1){ records[editIndex]=record; editIndex=-1; }
-  else { records.unshift(record); }
-
-  localStorage.setItem("records",JSON.stringify(records));
-  clearForm();
-  renderCards();
-}
-
-function editRecord(index){
-  const rec=records[index];
-  document.getElementById("name").value=rec.name;
-  document.getElementById("eggs").value=rec.eggs;
-  document.getElementById("rate").value=rec.rate;
-  document.getElementById("area").value=rec.area;
-  document.getElementById("status").value=rec.status;
-  toggleRateBox();
-  togglePaidBox();
-  document.getElementById("receivedAmount").value=rec.received||"";
-  editIndex=index;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function deleteRecord(index){
-  if(confirm("আপনি কি ডিলেট করতে চান?")){
-    records.splice(index,1);
-    localStorage.setItem("records",JSON.stringify(records));
-    renderCards();
-  }
-}
-
-function deleteSelected(){
-  if(selectedCards.size===0) return;
-  if(confirm("নির্বাচিত কার্ড ডিলেট করতে চান?")){
-    records=records.filter((_,i)=>!selectedCards.has(i));
-    selectedCards.clear();
-    document.getElementById("deleteSelectedBtn").style.display="none";
-    localStorage.setItem("records",JSON.stringify(records));
-    renderCards();
-  }
-}
-
-function clearForm(){
-  document.getElementById("name").value="";
-  document.getElementById("eggs").value="";
-  document.getElementById("rate").value=savedRate;
-  document.getElementById("area").value="২নং সি এন্ড বি";
-  document.getElementById("customArea").value="";
-  document.getElementById("status").value="Pending";
-  document.getElementById("receivedAmount").value="";
-  toggleRateBox();
-  togglePaidBox();
-}
-
-function toggleSelect(index,card){
-  if(selectedCards.has(index)){
-    selectedCards.delete(index);
-    card.classList.remove("selected");
-  } else {
-    selectedCards.add(index);
-    card.classList.add("selected");
-  }
-  document.getElementById("deleteSelectedBtn").style.display=selectedCards.size>0?"block":"none";
-}
-
-function renderCards(filteredRecords=records){
-  const container=document.getElementById("cardContainer");
-  container.innerHTML="";
-  let pendingSum=0, paidSum=0, buyerCount=0, eggCount=0, totalLoss=0;
-  filteredRecords.forEach((rec,index)=>{
-    if(rec.status==="Pending") pendingSum+=parseFloat(rec.total);
-    if(rec.status==="Paid"&&rec.received){
-      paidSum+=parseFloat(rec.received);
-      totalLoss+=parseFloat(rec.total)-parseFloat(rec.received);
+    function createWheelItems(items) {
+      const list = [];
+      for (let i = 0; i < 10; i++) list.push(...items);
+      return list;
     }
-    if(rec.area!=="এখানে প্রলটি"&&rec.area!=="এখানে ডিম নেমেছে"){
-      buyerCount++; eggCount+=rec.eggs;
+
+    let wheel1List = createWheelItems(cards);
+    let wheel2List = createWheelItems(suits);
+
+    function renderWheelItems() {
+      wheel1Items.innerHTML = wheel1List.map(i => `<div class="item">${i}</div>`).join('');
+      wheel2Items.innerHTML = wheel2List.map(i => `<div class="item">${i}</div>`).join('');
     }
-    const card=document.createElement("div");
-    card.className="card "+getAreaClass(rec.area);
-    card.oncontextmenu=(e)=>{e.preventDefault(); toggleSelect(index,card);};
-    card.innerHTML=`
-      <h3>${rec.name} ভাই</h3>
-      <p>Area: ${rec.area}</p>
-      <p>Egg: ${rec.eggs}</p>
-      <p>Rate: ${rec.rate||"-"}${rec.rate?"৳ (Per 100)":""}</p>
-      <p>Total: <b>${rec.total}৳</b></p>
-      ${rec.status==="Paid"&&rec.received?`<p>Receive Tk: <b>${rec.received}৳</b> <span class="loss-text">(${(rec.total-rec.received).toFixed(2)}৳ লস)</span></p>`:""}
-      <p>Time: ${rec.time}</p>
-      <span class="status ${rec.status==="Paid"?"paid":"pending"}">${rec.status}</span>
-      <div class="actions">
-        <button class="action-btn" onclick="editRecord(${index})">✏️ এডিট</button>
-        <button class="action-btn delete-btn" onclick="deleteRecord(${index})">🗑️ ডিলেট</button>
-      </div>`;
-    container.appendChild(card);
-  });
 
-  document.getElementById("pendingTotal").textContent=pendingSum.toFixed(2);
-  document.getElementById("paidTotal").textContent=paidSum.toFixed(2);
-  document.getElementById("buyerCount").textContent=buyerCount;
-  document.getElementById("eggCount").textContent=eggCount;
-  document.getElementById("lossAmount").textContent=totalLoss.toFixed(2);
-}
+    function renderBets(winItems = [], lostItems = []) {
+      betArea.innerHTML = '';
+      allItems.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'bet-box';
+        if (selectedBets[item]) box.classList.add('active');
+        if (winItems.includes(item)) box.classList.add('win');
+        else if (lostItems.includes(item)) box.classList.add('loss');
 
-function searchRecords(){
-  const date=document.getElementById("searchDate").value;
-  const name=document.getElementById("searchName").value.trim();
-  const area=document.getElementById("searchArea").value;
-  const status=document.getElementById("searchStatus").value;
+        const betVal = selectedBets[item] || 0;
+        box.innerHTML = `
+          <h3>${item}</h3>
+          <small>৳${betVal * betAmount}</small>
+          ${multiplierIndex === idx ? `<div class="multiplier-tag">${multiplierValue}×</div>` : ''}
+          <button onclick="placeBet('${item}')" 
+            ${isLocked || betVal >= maxBetPerItem || balance < betAmount ? 'disabled' : ''}>BET</button>
+        `;
+        betArea.appendChild(box);
+      });
+    }
 
-  const filtered=records.filter(r=>{
-    return (!date||r.date.includes(date.split("-").reverse().join("/"))) &&
-           (!name||r.name.includes(name)) &&
-           (!area||r.area===area) &&
-           (!status||r.status===status);
-  });
+    function placeBet(item) {
+      if (isLocked || balance < betAmount) return;
+      if (!selectedBets[item]) selectedBets[item] = 0;
+      if (selectedBets[item] >= maxBetPerItem) return;
+      selectedBets[item]++;
+      balance -= betAmount;
+      updateDisplay();
+      renderBets();
+    }
 
-  renderCards(filtered);
-}
+    function updateDisplay() {
+      balanceSpan.innerText = `Balance: ৳${balance}`;
+      totalStake = Object.values(selectedBets).reduce((sum, val) => sum + val * betAmount, 0);
+      stakeInfo.innerText = `Stake: ৳${totalStake}`;
+    }
 
-function resetSearch(){
-  document.getElementById("searchDate").value="";
-  document.getElementById("searchName").value="";
-  document.getElementById("searchArea").value="";
-  document.getElementById("searchStatus").value="";
-  renderCards();
-}
+    function logRound(card, suit, stake, reward) {
+      const div = document.createElement('div');
+      div.className = 'round-entry';
+      if (stake === 0) div.classList.add('warning-round');
+      else div.classList.add(reward > stake ? 'win-round' : 'loss-round');
+      div.textContent = `Card: ${card}, Suit: ${suit} | Stake: ৳${stake}, Return: ৳${reward.toFixed(2)}`;
+      roundLog.prepend(div);
+    }
 
-function getAreaClass(area){
-  switch(area){
-    case "২নং সি এন্ড বি":return "area-2nb";
-    case "আনসার রোড":return "area-ansar";
-    case "মাস্টার বাড়ি":return "area-master";
-    case "আমান সংলগ্ন":return "area-aman";
-    case "শ্রীপুর":return "area-shreepur";
-    case "আসপাড়া":return "area-aspara";
-    case "অন্যান্য":return "area-other";
-    case "এখানে প্রলটি":return "area-input";
-    case "এখানে ডিম নেমেছে":return "area-out";
-    default:return "";
-  }
-}
+    function spinWheel(wheel, list, result) {
+      return new Promise(resolve => {
+        const itemHeight = wheel.offsetHeight;
+        const itemsDiv = wheel.querySelector('.items');
+        const idx = [...list].map((v, i) => v === result ? i : -1).filter(i => i !== -1).pop();
+        itemsDiv.style.transition = 'none';
+        itemsDiv.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          itemsDiv.style.transition = 'transform 5s ease-out';
+          itemsDiv.style.transform = `translateY(-${idx * itemHeight}px)`;
+        }, 50);
+        setTimeout(resolve, 5000);
+      });
+    }
 
-document.getElementById("todayDate").textContent=new Date().toLocaleDateString("bn-BD",{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-renderCards();
-toggleRateBox();
-togglePaidBox();
-</script>
+    function flyCoin(fromElement, amount, isWin = true) {
+      const coin = document.createElement('div');
+      coin.className = 'flying-coin';
+      coin.textContent = (isWin ? '💰+' : '💸-') + amount;
+      document.body.appendChild(coin);
+
+      const fromRect = fromElement.getBoundingClientRect();
+      const toRect = balanceBox.getBoundingClientRect();
+      const startX = fromRect.left + fromRect.width / 2;
+      const startY = fromRect.top + fromRect.height / 2;
+      let endX, endY;
+
+      if (isWin) {
+        endX = toRect.left + toRect.width - 40;
+        endY = toRect.top + toRect.height / 2;
+      } else {
+        endX = startX + (Math.random() * 300 - 150);
+        endY = startY - 200 - Math.random() * 100;
+      }
+
+      coin.style.left = startX + 'px';
+      coin.style.top = startY + 'px';
+      coin.style.setProperty('--tx', (endX - startX) + 'px');
+      coin.style.setProperty('--ty', (endY - startY) + 'px');
+
+      coin.addEventListener('animationend', () => {
+        coin.remove();
+      });
+    }
+
+    async function spinAndResolve() {
+      isLocked = true;
+      timerDiv.innerText = '🎲 Spinning...';
+      timerDiv.classList.remove("highlighted");
+      timerDiv.style.fontSize = "18px";
+      timerDiv.style.color = "#ffd600";
+
+      const card = cards[Math.floor(Math.random() * cards.length)];
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+
+      await Promise.all([
+        spinWheel(document.getElementById('wheel1'), wheel1List, card),
+        spinWheel(document.getElementById('wheel2'), wheel2List, suit)
+      ]);
+
+      let totalWin = 0, stake = 0, winItems = [], lostItems = [];
+
+      Object.entries(selectedBets).forEach(([item, count]) => {
+        const bet = count * betAmount;
+        stake += bet;
+        if (item === card || item === suit) {
+          let multi = 3.5;
+          if (multiplierIndex !== null && allItems[multiplierIndex] === item) {
+            multi = multiplierValue;
+          }
+          totalWin += bet * multi;
+          winItems.push(item);
+        } else if (count > 0) lostItems.push(item);
+      });
+
+      const betBoxes = document.querySelectorAll('.bet-box');
+
+      if (totalWin > stake) {
+        winItems.forEach(winItem => {
+          betBoxes.forEach(box => {
+            if (box.querySelector('h3').textContent === winItem) {
+              flyCoin(box, Math.round(selectedBets[winItem] * betAmount));
+            }
+          });
+        });
+      } else {
+        lostItems.forEach(lostItem => {
+          betBoxes.forEach(box => {
+            if (box.querySelector('h3').textContent === lostItem) {
+              flyCoin(box, Math.round(selectedBets[lostItem] * betAmount), false);
+            }
+          });
+        });
+      }
+
+      balance += totalWin;
+      updateDisplay();
+      renderBets(winItems, lostItems);
+      logRound(card, suit, stake, totalWin);
+
+      setTimeout(() => {
+        selectedBets = {};
+        time = 15;
+        isLocked = false;
+        multiplierIndex = null;
+        multiplierValue = 1;
+        renderBets();
+        updateDisplay();
+        timerDiv.innerText = `Place bet: ${time}`;
+      }, 3000);
+
+      roundCount++;
+    }
+
+    function pickMultiplier() {
+      const idx = Math.floor(Math.random() * allItems.length);
+      const val = multipliers[Math.floor(Math.random() * multipliers.length)];
+      return { idx, val };
+    }
+
+    setInterval(() => {
+      if (!isLocked) {
+        if (time === 10 && roundCount % 2 === 0) {
+          const mul = pickMultiplier();
+          multiplierIndex = mul.idx;
+          multiplierValue = mul.val;
+          renderBets();
+        }
+        if (time === 5) timerDiv.classList.add("highlighted");
+
+        if (time > 0) timerDiv.innerText = `Place bet: ${time--}`;
+        else if (time === 0) spinAndResolve();
+      }
+    }, 1000);
+
+    renderWheelItems();
+    renderBets();
+    updateDisplay();
+
+
+    // pull-to-refresh বন্ধ করার জন্য নিচের
+    </script>
 </body>
 </html>
